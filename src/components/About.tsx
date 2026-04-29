@@ -1,6 +1,48 @@
 "use client";
 
 import Image from "next/image";
+import { useState, useRef } from "react";
+
+function CredentialCard({ label, detail, index }: { label: string; detail: string; index: number }) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [tilt, setTilt] = useState({ x: 0, y: 0 });
+  const [isHovered, setIsHovered] = useState(false);
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!cardRef.current) return;
+    const rect = cardRef.current.getBoundingClientRect();
+    const tiltX = ((e.clientY - rect.top - rect.height / 2) / (rect.height / 2)) * -5;
+    const tiltY = ((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 5;
+    setTilt({ x: tiltX, y: tiltY });
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => {
+        setIsHovered(false);
+        setTilt({ x: 0, y: 0 });
+      }}
+      className="scroll-reveal flex flex-col gap-1 p-4 rounded-2xl bg-white/60 transition-all duration-500 cubic-spring cursor-default"
+      style={{
+        transitionDelay: `${200 + index * 50}ms`,
+        transform: isHovered
+          ? `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) translateY(-2px)`
+          : "rotateX(0deg) rotateY(0deg) translateY(0)",
+        boxShadow: isHovered
+          ? "0 2px 4px rgba(0,0,0,0.02), 0 12px 32px rgba(196,144,138,0.06), inset 0 1px 0 rgba(255,255,255,0.6)"
+          : "inset 0 1px 0 rgba(255,255,255,0.3)",
+      }}
+    >
+      <span className="text-xs uppercase tracking-[0.15em] text-rose font-medium transition-colors duration-500">
+        {label}
+      </span>
+      <span className="text-sm font-medium text-text">{detail}</span>
+    </div>
+  );
+}
 
 export function About() {
   return (
@@ -11,17 +53,19 @@ export function About() {
       <div className="max-w-[1280px] mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 items-center">
           {/* Image column — Double Bezel */}
-          <div className="scroll-reveal md:col-span-5">
-            <div className="p-2 rounded-[2.5rem] bg-black/[0.03] ring-1 ring-black/[0.05]">
+          <div className="scroll-reveal md:col-span-5 group">
+            <div className="p-2 rounded-[2.5rem] bg-black/[0.03] ring-1 ring-black/[0.05] transition-all duration-700 cubic-spring group-hover:ring-rose/15 group-hover:bg-black/[0.05]">
               <div className="rounded-[calc(2.5rem-0.5rem)] overflow-hidden aspect-[3/4] bg-rose-light/20 relative">
                 <Image
                   src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=800&h=1067&fit=crop&q=85"
                   alt="Dra. Valeria Montserrat — Medicina Estética"
                   fill
                   sizes="(max-width: 768px) 100vw, 40vw"
-                  className="object-cover"
+                  className="object-cover transition-all duration-1000 cubic-in-out group-hover:scale-[1.03]"
                   priority
                 />
+                {/* Subtle overlay on hover */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 cubic-spring" />
               </div>
             </div>
           </div>
@@ -67,28 +111,15 @@ export function About() {
               </p>
             </div>
 
-            {/* Credentials */}
-            <div
-              className="scroll-reveal grid grid-cols-2 gap-4 mt-10"
-              style={{ transitionDelay: "200ms" }}
-            >
+            {/* Credentials with hover */}
+            <div className="grid grid-cols-2 gap-4 mt-10">
               {[
                 { label: "Colegiada", detail: "Nº 2828-1546" },
                 { label: "Formación", detail: "Universidad de Barcelona" },
                 { label: "Especialidad", detail: "Medicina Estética" },
                 { label: "Miembro de", detail: "SEME · AME" },
-              ].map((c) => (
-                <div
-                  key={c.label}
-                  className="flex flex-col gap-1 p-4 rounded-2xl bg-white/60"
-                >
-                  <span className="text-xs uppercase tracking-[0.15em] text-rose font-medium">
-                    {c.label}
-                  </span>
-                  <span className="text-sm font-medium text-text">
-                    {c.detail}
-                  </span>
-                </div>
+              ].map((c, i) => (
+                <CredentialCard key={c.label} {...c} index={i} />
               ))}
             </div>
           </div>

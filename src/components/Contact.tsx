@@ -1,9 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+
+function AnimatedInput({
+  label,
+  type = "text",
+  required = false,
+  placeholder,
+  rows,
+}: {
+  label: string;
+  type?: string;
+  required?: boolean;
+  placeholder: string;
+  rows?: number;
+}) {
+  const [focused, setFocused] = useState(false);
+  const [value, setValue] = useState("");
+  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
+
+  const Container = rows ? "div" : "div";
+  const InputTag = rows ? "textarea" : "input";
+
+  return (
+    <div className="flex flex-col gap-2 group">
+      <label className="text-xs uppercase tracking-[0.15em] text-rose font-medium transition-all duration-500 cubic-spring group-hover:text-rose-deep">
+        {label}
+      </label>
+      <div className="relative">
+        <InputTag
+          {...(rows ? { rows } : { type })}
+          ref={inputRef as never}
+          required={required}
+          value={value}
+          onChange={(e) => setValue((e.target as HTMLInputElement).value)}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={placeholder}
+          className={`w-full px-4 py-3 rounded-2xl bg-bg-alt text-text text-sm font-light placeholder:text-text-muted/40 focus:outline-none transition-all duration-500 cubic-spring resize-none ${
+            focused
+              ? "ring-2 ring-rose/20 bg-white shadow-[0_4px_24px_rgba(196,144,138,0.06)]"
+              : "ring-1 ring-transparent"
+          }`}
+          style={{
+            boxShadow: focused
+              ? "0 4px 24px rgba(196,144,138,0.06), inset 0 1px 0 rgba(255,255,255,0.6)"
+              : "inset 0 1px 0 rgba(255,255,255,0.3)",
+          }}
+        />
+        {/* Bottom highlight bar */}
+        <span
+          className={`absolute bottom-0 left-4 right-4 h-px bg-rose transition-all duration-500 cubic-spring ${
+            focused ? "scale-x-100 opacity-100" : "scale-x-0 opacity-0"
+          }`}
+        />
+      </div>
+    </div>
+  );
+}
 
 export function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -32,13 +90,18 @@ export function Contact() {
               estético.
             </h2>
 
-            <p className="scroll-reveal text-base text-text-muted font-light leading-relaxed mb-12 max-w-md" style={{ transitionDelay: "100ms" }}>
+            <p
+              className="scroll-reveal text-base text-text-muted font-light leading-relaxed mb-12 max-w-md"
+              style={{ transitionDelay: "100ms" }}
+            >
               La primera consulta es un espacio para conocernos, entender tus
               objetivos y diseñar juntos un plan personalizado sin compromiso.
             </p>
 
-            {/* Contact details */}
-            <div className="scroll-reveal space-y-6" style={{ transitionDelay: "150ms" }}>
+            <div
+              className="scroll-reveal space-y-6"
+              style={{ transitionDelay: "150ms" }}
+            >
               {[
                 {
                   label: "Dirección",
@@ -80,15 +143,15 @@ export function Contact() {
                   ),
                 },
               ].map((item) => (
-                <div key={item.label} className="flex gap-4">
-                  <div className="w-9 h-9 rounded-full bg-rose-light/40 flex items-center justify-center text-rose-deep shrink-0 mt-0.5">
+                <div key={item.label} className="flex gap-4 group cursor-default">
+                  <div className="w-9 h-9 rounded-full bg-rose-light/40 flex items-center justify-center text-rose-deep shrink-0 mt-0.5 transition-all duration-500 cubic-spring group-hover:bg-rose-light/60 group-hover:scale-110 group-hover:shadow-[0_0_16px_rgba(196,144,138,0.15)]">
                     {item.icon}
                   </div>
                   <div>
                     <p className="text-xs uppercase tracking-[0.15em] text-rose font-medium mb-1">
                       {item.label}
                     </p>
-                    <p className="text-sm text-text font-light leading-relaxed whitespace-pre-line">
+                    <p className="text-sm text-text font-light leading-relaxed whitespace-pre-line transition-colors duration-500 group-hover:text-text">
                       {item.value}
                     </p>
                   </div>
@@ -100,12 +163,11 @@ export function Contact() {
           {/* Right: Form */}
           <div className="md:col-span-7">
             <div className="scroll-reveal">
-              {/* Double-Bezel form container */}
-              <div className="p-[1.5px] rounded-[2.5rem] bg-black/[0.04] ring-1 ring-black/[0.04]">
+              <div className="p-[1.5px] rounded-[2.5rem] bg-black/[0.04] ring-1 ring-black/[0.04] transition-all duration-700 cubic-spring hover:ring-rose/10">
                 <div className="rounded-[calc(2.5rem-1.5px)] bg-white p-8 md:p-12">
                   {submitted ? (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
-                      <div className="w-16 h-16 rounded-full bg-rose-light/40 flex items-center justify-center mb-6">
+                      <div className="w-16 h-16 rounded-full bg-rose-light/40 flex items-center justify-center mb-6 animate-[fade-up_0.6s_cubic-bezier(0.16,1,0.3,1)]">
                         <svg
                           width="28"
                           height="28"
@@ -129,35 +191,24 @@ export function Contact() {
                   ) : (
                     <form onSubmit={handleSubmit} className="space-y-6">
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                        <div className="flex flex-col gap-2">
-                          <label className="text-xs uppercase tracking-[0.15em] text-rose font-medium">
-                            Nombre
-                          </label>
-                          <input
-                            type="text"
-                            required
-                            className="px-4 py-3 rounded-2xl bg-bg-alt text-text text-sm font-light placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-rose/20 transition-all duration-500 cubic-spring"
-                            placeholder="Tu nombre"
-                          />
-                        </div>
-                        <div className="flex flex-col gap-2">
-                          <label className="text-xs uppercase tracking-[0.15em] text-rose font-medium">
-                            Email
-                          </label>
-                          <input
-                            type="email"
-                            required
-                            className="px-4 py-3 rounded-2xl bg-bg-alt text-text text-sm font-light placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-rose/20 transition-all duration-500 cubic-spring"
-                            placeholder="tu@email.com"
-                          />
-                        </div>
+                        <AnimatedInput
+                          label="Nombre"
+                          required
+                          placeholder="Tu nombre"
+                        />
+                        <AnimatedInput
+                          label="Email"
+                          type="email"
+                          required
+                          placeholder="tu@email.com"
+                        />
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs uppercase tracking-[0.15em] text-rose font-medium">
+                      <div className="flex flex-col gap-2 group">
+                        <label className="text-xs uppercase tracking-[0.15em] text-rose font-medium transition-all duration-500 cubic-spring group-hover:text-rose-deep">
                           Tratamiento de interés
                         </label>
-                        <select className="px-4 py-3 rounded-2xl bg-bg-alt text-text text-sm font-light focus:outline-none focus:ring-2 focus:ring-rose/20 transition-all duration-500 cubic-spring appearance-none">
+                        <select className="w-full px-4 py-3 rounded-2xl bg-bg-alt text-text text-sm font-light focus:outline-none focus:ring-2 focus:ring-rose/20 transition-all duration-500 cubic-spring appearance-none cursor-pointer hover:bg-white">
                           <option>Selecciona un tratamiento</option>
                           <option>Toxina Botulínica</option>
                           <option>Ácido Hialurónico</option>
@@ -170,23 +221,28 @@ export function Contact() {
                         </select>
                       </div>
 
-                      <div className="flex flex-col gap-2">
-                        <label className="text-xs uppercase tracking-[0.15em] text-rose font-medium">
-                          Mensaje
-                        </label>
-                        <textarea
-                          rows={4}
-                          className="px-4 py-3 rounded-2xl bg-bg-alt text-text text-sm font-light placeholder:text-text-muted/50 focus:outline-none focus:ring-2 focus:ring-rose/20 transition-all duration-500 cubic-spring resize-none"
-                          placeholder="Cuéntanos qué te gustaría mejorar..."
-                        />
-                      </div>
+                      <AnimatedInput
+                        label="Mensaje"
+                        placeholder="Cuéntanos qué te gustaría mejorar..."
+                        rows={4}
+                      />
 
                       <button
                         type="submit"
-                        className="w-full flex items-center justify-center gap-3 pl-6 pr-2.5 py-3 bg-text text-bg rounded-full text-base font-medium transition-all duration-500 cubic-spring hover:scale-[0.98] active:scale-[0.96] group"
+                        onMouseDown={() => setIsPressed(true)}
+                        onMouseUp={() => setIsPressed(false)}
+                        onMouseLeave={() => setIsPressed(false)}
+                        className="w-full flex items-center justify-center gap-3 pl-6 pr-2.5 py-3 bg-text text-bg rounded-full text-base font-medium transition-all duration-500 cubic-spring hover:scale-[0.98] active:scale-[0.96] group relative overflow-hidden"
                       >
-                        <span>Solicitar cita informativa</span>
-                        <span className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition-all duration-500 cubic-spring group-hover:translate-x-0.5 group-hover:-translate-y-px group-hover:scale-105">
+                        {/* Shimmer effect */}
+                        <span
+                          className={`absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 transition-all duration-700 cubic-spring ${
+                            isPressed ? "translate-x-full" : "-translate-x-full"
+                          } group-hover:translate-x-full`}
+                          style={{ transitionDuration: "700ms" }}
+                        />
+                        <span className="relative z-10">Solicitar cita informativa</span>
+                        <span className="relative z-10 w-8 h-8 rounded-full bg-white/15 flex items-center justify-center transition-all duration-500 cubic-spring group-hover:translate-x-0.5 group-hover:-translate-y-px group-hover:scale-105">
                           <svg
                             width="14"
                             height="14"

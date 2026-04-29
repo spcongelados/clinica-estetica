@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { CountUp } from "@/components/CountUp";
 
 export function Hero() {
   return (
@@ -115,13 +115,13 @@ export function Hero() {
           style={{ transitionDelay: "300ms" }}
         >
           {[
-            { value: "15+", label: "Años de experiencia" },
-            { value: "8,000+", label: "Pacientes satisfechos" },
-            { value: "100%", label: "Resultados naturales" },
+            { value: 15, suffix: "+", label: "Años de experiencia" },
+            { value: 8000, suffix: "+", label: "Pacientes satisfechos" },
+            { value: 100, suffix: "%", label: "Resultados naturales" },
           ].map((s) => (
             <div key={s.label}>
               <p className="text-2xl md:text-3xl font-light tracking-tight text-text">
-                {s.value}
+                <CountUp end={s.value} suffix={s.suffix} />
               </p>
               <p className="text-sm text-text-muted mt-1 font-light">
                 {s.label}
