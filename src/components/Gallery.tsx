@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 const cases = [
   {
@@ -38,6 +38,7 @@ function ComparisonSlider({ before, after, label }: { before: string; after: str
   const containerRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState(50);
   const [isDragging, setIsDragging] = useState(false);
+  const [containerWidth, setContainerWidth] = useState(0);
 
   const updatePosition = useCallback(
     (clientX: number) => {
@@ -48,6 +49,17 @@ function ComparisonSlider({ before, after, label }: { before: string; after: str
     },
     []
   );
+
+  // Track container width for the before image
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const update = () => setContainerWidth(el.getBoundingClientRect().width);
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   const handleMouseDown = () => setIsDragging(true);
   const handleMouseUp = () => setIsDragging(false);
@@ -85,17 +97,14 @@ function ComparisonSlider({ before, after, label }: { before: string; after: str
         className="absolute inset-0 overflow-hidden"
         style={{ width: `${position}%` }}
       >
-        <div className="absolute inset-0 w-[100vw] max-w-none">
-          <Image
-            src={before}
-            alt={`Antes — ${label}`}
-            fill
-            sizes="100vw"
-            className="object-cover"
-            draggable={false}
-            style={{ width: containerRef.current ? `${(100 / position) * 100}%` : "100%" }}
-          />
-        </div>
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={before}
+          alt={`Antes — ${label}`}
+          draggable={false}
+          className="absolute top-0 left-0 h-full object-cover max-w-none"
+          style={{ width: containerWidth || "100vw" }}
+        />
       </div>
 
       {/* Slider line */}
